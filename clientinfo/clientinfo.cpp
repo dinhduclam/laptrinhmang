@@ -44,30 +44,35 @@ int main() {
 	
 	//todo get drive name
 	CHAR DriveName[32];
-	if (GetLogicalDriveStringsA(256, DriveName)) {
+	int drive_leng = GetLogicalDriveStringsA(256, DriveName);
+	if (drive_leng) {
 		strcat(client_info, "Drive Name: ");
-		strcat(client_info, DriveName);
+		for (int i = 0; i < drive_leng; i+=4)
+			strcat(client_info, DriveName + i);
 		strcat(client_info, "\n");
 	};
-	
+
 	//todo get free space
-	LPCSTR root = "C:\\";
+	LPCSTR root = "";
 	DWORD sectorsPerCluster;
 	DWORD bytesPerSector;
 	DWORD numberOfFreeClusters;
 	DWORD totalNumberOfClusters;
-	if (GetDiskFreeSpaceA(root, &sectorsPerCluster, &bytesPerSector, &numberOfFreeClusters, &totalNumberOfClusters)) {
-		
-		long long free_space = (long long)bytesPerSector * sectorsPerCluster * numberOfFreeClusters;
+	long long free_space = 0;
 
-		std::string s = (std::to_string(free_space));
-		const char* freespace = s.c_str();
+	for (int i = 0; i < drive_leng; i += 4) {
+		root = DriveName + i;
+		if (GetDiskFreeSpaceA(root, &sectorsPerCluster, &bytesPerSector, &numberOfFreeClusters, &totalNumberOfClusters))
+			free_space += (long long)bytesPerSector * sectorsPerCluster * numberOfFreeClusters;
+	}
+	std::string s = (std::to_string(free_space));
+	const char* freespace = s.c_str();
 
-		strcat(client_info, "Free Space: ");
-		strcat(client_info, freespace);
-		strcat(client_info, " Byte\n");
-	}; 
+	strcat(client_info, "Free Space: ");
+	strcat(client_info, freespace);
+	strcat(client_info, " Byte\n"); 
 
+	//todo send client info
 	send(client_socket, client_info, strlen(client_info), 0);
 
 	closesocket(client_socket);

@@ -22,8 +22,8 @@ int main(int argc, char* argv[])
 
     SOCKADDR_IN addr;
     addr.sin_family = AF_INET;
-    addr.sin_addr.s_addr = inet_addr("127.0.0.1");
-    addr.sin_port = htons(8000);
+    addr.sin_addr.s_addr = inet_addr(target_ip);
+    addr.sin_port = htons(target_port);
 
     system("pause");
 
@@ -35,20 +35,24 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    //ret = recv(client_sock, buf, sizeof(buf), 0);
-
     char buf[256];
+
+    ret = recv(client_sock, buf, sizeof(buf) - 1, 0);
+    if (ret > 0) {
+        buf[ret] = 0;
+        printf("%s\n", buf);
+    }
+
     while (1)
     {
         fgets(buf, sizeof(buf), stdin);
         
-        if (strcmp(buf, "end")) {
+        if (strncmp(buf, "exit", 4) == 0) {
             printf("End. Close connection!");
             break;
         }
 
         send(client_sock, buf, strlen(buf), 0);
-        
     }
 
     closesocket(client_sock);

@@ -9,7 +9,7 @@ int main(int argc, char* argv[]){
 	unsigned short target_port = 0;
 
 	for (int i = 0; argv[1][i]; i++) {
-		target_port = target_port * 10 + argv[2][i] - '0';
+		target_port = target_port * 10 + argv[1][i] - '0';
 	}
 
 	WSADATA wsa;
